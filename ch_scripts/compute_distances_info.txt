@@ -1,0 +1,89 @@
+START OF SCRIP
+скрипт: compute_distances.py
+На вход:
+clones_file
+distfile_prefix
+outfile
+organism
+intrasubject_nbrdists (1 or 0) #будут ли учитываться nbr расстояния внутри объекта
+clones_files (несколько файлов)
+epitope_prefixes (несколько разных штук)
+nbrdist_percentiles (персентили, дефолтные - 5 10 25)
+distance_params (параметры)
+
+new_nbrdists = not intrasubject_nbrdists
+
+distance_params = tcr_distances.DistanceParams( config_string = distance_params )
+Грубо говоря, они будут дефолтными, если ничего не будет задано в distance_params изначально
+
+если нет clones_file!S!, то создаем его, используя лишь clones_file.
+
+Нет префиксов эпитопов, то [‘’ кол-ва объектов в clones_files]
+
+rep_dists = compute_all_v_region_distances. = {id1:id2:расстояние}
+
+distfile_prefix = clones_files[0][:-4] - хз, что это.
+
+outfile -> {}_nbrdists.tsv
+
+infields - header файла из clones_files
+all_infields[все infields]
+
+l = parse_tsv_line (из parse_tsv) убираем последний \n, split по ‘\t’ возвращаем
+l = vals = {key из infields: val}
+
+va/b_genes - l[‘va/b_genes’].split(‘;’)
+va/b_reps = frozenset(id, представляющие разные сиквенсы (повторений не будет))
+
+all_info=[все l]
+
+all_tcrs[[va_reps, vb_reps, cdr3a, cdr3b]]
+
+outfields[всякие участки в infields, которые есть во всех файлах]
+
+epitopes - создаются заново для каждого типа из [‘A’, ‘B’, ‘AB’] и сортируются
+epitope_self_nbrdists = {‘’:эпитоп:персентили, ‘wtd_’:эпитоп:персентили}, причем эпитоп и персентили совпадают.
+
+all_clone_ids = [все id клонов из файлов (берем из all_info)]
+
+out: открываем файл с dist для каждой цепи, в который будем записывать инфу
+
+e_out = {эпитоп:открываем файл с расстояниями и эпитопами}
+
+total_tcrs = кол-во tcr
+для каждого tcr:
+/
+epitope_distances = {эпитоп:[]}
+e1 = эпитоп для tcr
+m1 = персона с tcr
+clone_id1 = id клона
+dists = [расстояние между tcr1 и tcr2 – минимально возможное расстояние по V + cdr3 расстояние]
+my_epitope_dists = [расстояние между объектами для одного эпитопа]
+epitope_distances[e2] = dist (если new_nbrdists (или НЕ intrasubject_nbrdists), то между субъектами. Иначе – для всех)
+
+169-171
+в out записываем clone_id1 расстояния 
+в e_out[e1] записываем clone_id1 расстояния из my_epitope_dists
+
+проходимся по epitope_distances
+nbrdist = считаем nbrdist 
+wtd_nbrdist = считаем взвешенный nbrdist
+добавляем в all_info[tcr]  {‘эпитоп}_{цепи}nbrdist/wtd_nbrdist{персентиль} элементы nbrdist и wtd_nbrdist
+
+(epitope_self_nbrdists = {‘’:эпитоп:персентили, ‘wtd_’:эпитоп:персентили}, причем эпитоп и персентили совпадают.)
+в epitope_self_nbrdists запихиваем в ‘’ невзвешенное расстояние, а в wtd_ – взвешенное
+/ В результате для каждого эпитопа получаем список из расстояний до всех эпитопов
+
+закрываем out и e_out.values
+
+к outfields[всякие участки в infields, которые есть во всех файлах] добавляем имяэпитопа_{цепи}_{‘’/wtd_}nbrdist{percentile}’’/rank
+
+сортируем в epitope_self_nbrdists конечные внутренности
+self_nbrdists – расстояния для эпитопа из epitope_self_nbrdists
+nbrdist = all_info[ii][эпитоп_цепи_’’/wtd_nbrdistперсентиль]
+ранг = получение ранга этого расстояния относительно расстояний до других эпитопов
+добавляем в all_info[tcr]  {‘эпитоп}_{цепи}nbrdist/wtd_nbrdist{персентиль}rank ранг.
+
+записываем в outfile outfields (header), и make_tsv_line из элемента в all_info
+
+END OF SCRIPT

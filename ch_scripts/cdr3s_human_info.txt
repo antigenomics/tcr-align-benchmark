@@ -1,0 +1,65 @@
+START OF SCRIPT
+скрипт: cdr3s_human.py
+pb_cdr_positions – позиции в cdr
+alseq_C_pos – где начинается C-домен
+extra_alignment_columns – еще какая-то шняга
+default_num_positions_after_GXG – кол-во позиций после GXG в J
+
+all_funny_jseq – какие-то интересные J-последовательности.
+funny_jseq – словарь с этими последовательностями по организмами и цепям
+
+align_fasta – считывается файл из что-то_TR_protein_sequences_with_gaps.fasta
+{id(TRAV/TRBVкакой-то):последовательность}. Проверка и достройка гэпов до C-домена
+
+fasta — считывается файл из что-то_TR_protein_sequences.fasta
+{id(TRAV/TRAJ/TRBV/TRBJ):последовательность}. Тут гэпов нету.
+
+143 if True:
+all_num_genome_j_positions_in_loop[organism] = {A/B:TRAJ/TRBJ:позиции J-последовательности} по крайней мере, попытка их получить. Вручную вбивали отклонения.
+
+176-193 ничего особого, проверка.
+
+pb_cdrs[organism] = {TRBV/TRAVкакие-то:[(seq_no_gap, начало петли, конец петли)]} – CDR1, CDR2, CDR2.5
+
+all_loopseq_representative_mm1[organism] = {}
+
+org_merged_loopseqs{id:’CDR1_CDR2_CDR2.5’}
+all_loopseq_nbrs = {id:[все id, которые имеют одинаковый seq]} для V и разных цепей (пересечений между цепями нет)
+all_loopseq_nbrs_mm1 = {id:[все id, которые имеют одинаковый seq (или отличаются не более чем на одну аминокислоту)]} для V и разных цепей
+loop_mismatches_cdrx - кол-во mismatches в cdr2.5 (=cdrx)
+
+all_loopseq_representative[organism] = {id из all_loopseq_nbrs:min(all_loopseq_nbrs[id])}
+
+all_merged_loopseqs[organism][id] = org_merged_loopseqs[id][:] – вся последовательность CDR1_CDR2_CDR2.5
+325-343 – добавляем транзитивность в all_loopseq_nbrs_mm1
+all_loopseq_representative_mm1[organism][id] = min(all_loopseq_nbrs_mm1[id])
+
+jloopseqs - используем J-последовательности из all_num_genome_j_positions_in_loop
+jloopseqs[id] = последовательность
+all_jloopseq_nbrs[id] = [id последовательностей с таким же сиквенсом]
+all_jseq_representative – аналогично, [organism][id] = min(all_jloopseq_nbrs[id])
+
+378
+extra_alignment_columns– какие-то странные места..
+core_positions_generic_1indexed = коровые позиции? Оо
+poslist – реальные позиции шняг из core_positions_generic_1indexed без гэпов (или -1)
+all_core_positions[organism][id] – все коровые позиции в seq без гэпов
+
+all_align_fasta[ organism ] = align_fasta
+all_fasta[ organism ] = fasta
+
+415 parse_core_positions
+output: qcore_positions = [qpos] из v_hit.q2hmap
+	mismatches – их кол-во
+
+443 parse_other_cdrs
+Тоже какая-то фигня, анализирующая q2hmap
+
+get_cdr3_and_j_match_counts
+output: cdrseq, [mismatches, matches], errors
+
+
+parse_cdr3
+output: cdrseq, v_match_counts, j_match_counts, errors
+
+END OF SCRIPT
